@@ -1,4 +1,4 @@
-package geo.hash;
+package geo.hash.geohash.solution;
 
 import lombok.NonNull;
 

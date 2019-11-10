@@ -1,10 +1,9 @@
-package geo.hash;
+package geo.hash.geohash.solution;
 
 import com.google.common.collect.ImmutableList;
+import geo.hash.geohash.solution.Wgs84Point;
+import geo.hash.geohash.solution.GeoHash;
 import org.junit.jupiter.api.Test;
-import org.locationtech.spatial4j.context.SpatialContext;
-import org.locationtech.spatial4j.shape.impl.PointImpl;
-
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +46,8 @@ class GeoHashTest {
         final GeoHash geoHash = new GeoHash(9, position);
         assertEquals("gcpvh0x7e", geoHash.value());
         final var neighborGeoHashValues = geoHash.getNeighborGeoHashValues();
-        assertIterableEquals(neighborGeoHashValues, ImmutableList.of("gcpvh0x7g",
+        assertIterableEquals(neighborGeoHashValues, ImmutableList.of(
+                "gcpvh0x7g",
                 "gcpvh0x7u",
                 "gcpvh0x7s",
                 "gcpvh0x7k",

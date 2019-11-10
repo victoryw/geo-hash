@@ -1,15 +1,13 @@
-package geo.hash;
+package geo.hash.geohash.solution;
 
 import com.google.common.collect.ImmutableList;
+import geo.hash.util.Base32;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class GeoHash {
     private static final int BITS_PER_LAYER = 5;
-
+    public static final int MAX_LAYERS = 12;
     private final int layers;
     private final Wgs84Point wgs84Point;
     private final long resultCode;

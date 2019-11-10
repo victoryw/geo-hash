@@ -1,4 +1,4 @@
-package geo.hash;
+package geo.hash.util;
 
 import java.util.HashMap;
 
