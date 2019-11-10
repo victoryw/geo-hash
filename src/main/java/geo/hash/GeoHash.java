@@ -1,23 +1,51 @@
 package geo.hash;
 
-import java.util.HashMap;
+import com.google.common.collect.ImmutableList;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class GeoHash {
     private static final int BITS_PER_LAYER = 5;
 
     private final int layers;
     private final Wgs84Point wgs84Point;
-    private final LayerBisection latBisection;
-    private final LayerBisection longBisection;
+    private final long resultCode;
+    private final long latBits;
+    private final long longBits;
 
     public GeoHash(int layers, Wgs84Point wgs84Point) {
         this.layers = layers;
         this.wgs84Point = wgs84Point;
+        latBits = new LayerBisection(getLatBitNumber(), -90, 90)
+                .split(this.getWgs84Point().getLat());
 
-        final var totalBits = getTotalBits();
-        this.latBisection = new LayerBisection(getLatBitNumber(),
-                -90, 90);
-        this.longBisection = new LayerBisection(getLongBitNum(), -180, 180);
+        longBits = new LayerBisection(getLongBitNum(), -180, 180)
+                .split(this.getWgs84Point().getLng());
+
+        this.resultCode = merge(latBits, longBits);
+    }
+
+    private long merge(long latBits, long longBits) {
+        long result = 0b0;
+        for (int bitPos = 0; bitPos < getTotalBits(); bitPos = bitPos + 1) {
+            final int valueRightPos = (getTotalBits() - bitPos) - 1;
+            if (bitPos / 2 * 2 == bitPos) {
+                //even
+                int longPos = getLongBitNum() - bitPos / 2;
+                long longBitAtPos = (longBits >> (longPos - 1)) & 1;
+                result = result | longBitAtPos << valueRightPos;
+            } else {
+                //odd
+                int latPos = getLatBitNumber() - (bitPos - 1) / 2;
+                long latBitAtPos = (latBits >> (latPos - 1)) & 1;
+                result = result | latBitAtPos << valueRightPos;
+            }
+
+        }
+        return result;
     }
 
     private int getLongBitNum() {
@@ -34,26 +62,37 @@ public class GeoHash {
     }
 
     public String value() {
-        final long latBits = latBisection.split(wgs84Point.getLat());
-        final long longBits = longBisection.split(wgs84Point.getLng());
-        long resultCode = 0b0;
-        for (int bitPos = 0; bitPos < getTotalBits(); bitPos = bitPos + 1) {
-            final int valueRightPos = (getTotalBits() - bitPos) - 1;
-            if (bitPos / 2 * 2 == bitPos) {
-                //even
-                int longPos = getLongBitNum() - bitPos / 2;
-                long longBitAtPos = (longBits >> (longPos - 1)) & 1;
-                resultCode = resultCode | longBitAtPos << valueRightPos;
-            } else {
-                //odd
-                int latPos = getLatBitNumber() - (bitPos - 1) / 2;
-                long latBitAtPos = (latBits >> (latPos - 1)) & 1;
-                resultCode = resultCode | latBitAtPos << valueRightPos;
-            }
-
-        }
-
         return Base32.encodeBase32(resultCode);
+    }
+
+    //North->NorthEast->East->SouthEast->South->SouthWest->West->NorthWest
+    public List<String> getNeighborGeoHashValues() {
+        final var latNorthBits = this.latBits + 1;
+        final var longEastBits = this.longBits + 1;
+        final var latSouthBits = this.latBits - 1;
+        final var longWestBits = this.longBits - 1;
+
+        long northMergedBits = merge(latNorthBits, this.longBits);
+        long northEastMergedBits = merge(latNorthBits, longEastBits);
+        long eastMergedBits = merge((this.latBits), longEastBits);
+        long southEastMergedBits = merge(latSouthBits, longEastBits);
+        long southMergedBits = merge(latSouthBits, this.longBits);
+        long southWestMergedBits = merge(latSouthBits, longWestBits);
+        long westMergedBits = merge(this.latBits, longWestBits);
+        long northWestMergedBits = merge(latNorthBits, longWestBits);
+
+        return ImmutableList.of(Base32.encodeBase32(northMergedBits),
+                Base32.encodeBase32(northEastMergedBits),
+                Base32.encodeBase32(eastMergedBits),
+                Base32.encodeBase32(southEastMergedBits),
+                Base32.encodeBase32(southMergedBits),
+                Base32.encodeBase32(southWestMergedBits),
+                Base32.encodeBase32(westMergedBits),
+                Base32.encodeBase32(northWestMergedBits));
+    }
+
+    public Wgs84Point getWgs84Point() {
+        return wgs84Point;
     }
 }
 

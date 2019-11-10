@@ -18,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    implementation("commons-codec:commons-codec:1.10");
     implementation("com.google.guava:guava:28.1-jre");
+    implementation("org.locationtech.spatial4j:spatial4j:0.7");
 
     // Use JUnit Jupiter API for testing.
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")

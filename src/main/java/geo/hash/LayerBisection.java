@@ -1,5 +1,7 @@
 package geo.hash;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 
 public class LayerBisection {
@@ -16,10 +18,12 @@ public class LayerBisection {
         this.rangeEnd = rangeEnd;
     }
 
+    @NonNull
     public long split(final BigDecimal value) {
        return split(value, rangeBegin, rangeEnd, 0, 1);
     }
 
+    @NonNull
     private long split(final BigDecimal value, final double rangeBegin,
                        final double rangeEnd, final long currentHash,
                        final int currentLayer) {

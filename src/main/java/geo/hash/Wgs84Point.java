@@ -1,5 +1,10 @@
 package geo.hash;
 
+import lombok.NonNull;
+import org.locationtech.spatial4j.context.SpatialContext;
+import org.locationtech.spatial4j.shape.Point;
+import org.locationtech.spatial4j.shape.impl.PointImpl;
+
 import java.math.BigDecimal;
 
 
@@ -13,11 +18,17 @@ public class Wgs84Point {
         this.lng = lng;
     }
 
-    public BigDecimal getLat() {
+    @NonNull
+     public BigDecimal getLat() {
         return lat;
     }
 
+    @NonNull
     public BigDecimal getLng() {
         return lng;
+    }
+
+    public Point toSpatial4jPoint() {
+        return new PointImpl(lng.doubleValue(), lat.doubleValue(), SpatialContext.GEO);
     }
 }
